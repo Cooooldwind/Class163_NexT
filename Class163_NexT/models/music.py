@@ -9,6 +9,7 @@ QUALITY_LIST = ["", "standard", "higher", "exhigh", "lossless"]
 QUALITY_FORMAT_LIST = ["", "mp3", "mp3", "mp3", "aac"]
 
 class Music:
+
     # General information
     id: int = -1
     title: str = ""
@@ -16,20 +17,28 @@ class Music:
     subtitle: str = ""
     artists: list[str] = []
     album: str = ""
+
     # Cover file
     cover_url: str = ""
     cover_file: bytes = b""
+
     # Lyrics
     lyric: str = ""
     trans_lyric: str = ""
+
     # Music file
     music_url: str = ""
     music_file: bytes = b""
     quality: int = -1
+
+
     # Initialization
     def __init__(self, session: EncodeSession, music_id: int, quality: int = 1):
+
+        #Write ID & qualify required
         self.id = music_id
         self.quality = quality if self.quality != -1 else self.quality
+
         # Get & sort detail information
         detail_response = session.encoded_post(DETAIL_URL,
                                                {
@@ -45,6 +54,7 @@ class Music:
         self.artists = [artist["name"] for artist in detail_response["ar"]]
         self.album = detail_response["al"]["name"]
         self.cover_url = detail_response["al"]["picUrl"]
+
         # Get & sort lyric information
         lyric_response = session.encoded_post(LYRIC_URL,
                                               {
@@ -55,6 +65,7 @@ class Music:
         self.trans_lyric = lyric_response["tlyric"]["lyric"] \
             if "tlyric" in lyric_response \
             else ""
+
         # Get & sort music file information
         file_response = session.encoded_post(FILE_URL,
                                              {
@@ -64,17 +75,3 @@ class Music:
                                              }).json()["data"][0]
         self.music_url = file_response["url"]
         pass
-
-"""
-self.__detail_encode_data = {"c": str([{"id": self.id}])}
-self.__lyric_encode_data = {
-    "id": self.id,
-    "lv": -1,
-    "tv": -1,
-}
-self.__file_encode_data = {
-    "ids": str([self.id]),
-    "level": None,
-    "encodeType": None,
-}
-"""
