@@ -1,3 +1,4 @@
+import requests
 from netease_encode_api import EncodeSession
 
 DETAIL_URL = "https://music.163.com/weapi/v3/song/detail"
@@ -38,7 +39,7 @@ class Music:
                  file: bool = False):
         #Write ID & qualify required
         self.id = music_id
-        self.quality = quality if self.quality != -1 else self.quality
+        self.quality = quality
         # Get & sort detail information
         if detail: self.get_detail(session)
         # Get & sort lyric information
@@ -85,9 +86,10 @@ class Music:
                                              }).json()["data"][0]
         self.music_url = file_response["url"]
 
-    def download_music(self, filename: str = f"{self.title} - {", ".join(self.artists)}"):
+    def download_music(self, filename: str = "AUTO_CREATE"):
+        if filename == "AUTO_CREATE": filename = f"{self.title} - {", ".join(self.artists)}"
         r = requests.get(self.music_url)
-        with open(filename + (".flac" if self.quality > 3 else ".mp3"), "wb") as f:
+        with open(filename + (".flac" if self.quality == 4 else ".mp3"), "wb") as f:
             for chunk in r.iter_content(1024):
                 f.write(chunk)
 
