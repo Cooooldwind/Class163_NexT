@@ -3,6 +3,28 @@ from netease_encode_api import EncodeSession
 from .music import Music
 
 PLAYLIST_URL = "https://music.163.com/weapi/v6/playlist/detail"
+DETAIL_URL = "https://music.163.com/weapi/v3/song/detail"
+FILE_URL = "https://music.163.com/weapi/song/enhance/player/url/v1"
+
+def retail_get_tracks_detail(session: EncodeSession, tracks: list[Music]) -> list[Music]:
+    detail_response = session.encoded_post(DETAIL_URL,
+                                           {
+                                               "c": str([{"id": str(track.id)} for track in tracks]),
+                                           }).json()["songs"]
+    ret: list[Music] = tracks
+    for index, track in enumerate(ret): track.get_detail(EncodeSession(), detail_response[index])
+    return ret
+
+def retail_get_tracks_file(session: EncodeSession, tracks: list[Music]) -> list[Music]:
+    file_response = session.encoded_post(FILE_URL,
+                                           {
+                                               "ids": str([{"id": str(track.id)} for track in tracks]),
+                                               "level": QUALITY_LIST[self.quality],
+                                               "encodeType": QUALITY_FORMAT_LIST[self.quality]
+                                           }).json()["data"]
+    ret: list[Music] = tracks
+    for index, track in enumerate(ret): track.get_file(EncodeSession(), file_response[index])
+    return ret
 
 class Playlist:
     id: int = -1
@@ -32,8 +54,22 @@ class Playlist:
         self.description = playlist_response["description"]
         self.track_count = playlist_response["trackCount"]
         self.tracks = [Music(EncodeSession(), track["id"]) for track in playlist_response["trackIds"]]
-        # Deal with tracks in concurrent.futures
-        threadpool = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            for i in self.tracks:
-                threadpool.append(executor.submit(i.__init__, session, i.id, quality, detail, lyric, file))
+        # Deal with tracks in concurrent.futures. Optimized in 0.1.3. Didn't test.
+        futures = []
+        if detail:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                per_sum = 10 ** (len(str(self.track_count)) - 1)
+                for i in range(0, self.track_count, per_sum):
+                    futures.append(executor.submit(retail_get_tracks_detail, session, self.tracks[i:i + per_sum]))
+            self.tracks = [t for f in futures for t in f.result()]
+        if lyric:
+            threadpool = []
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                for i in self.tracks:
+                    threadpool.append(executor.submit(i.__init__, session, i.id, quality, False, True, False))
+        if file:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                per_sum = 10 ** (len(str(self.track_count)) - 1)
+                for i in range(0, self.track_count, per_sum):
+                    futures.append(executor.submit(retail_get_tracks_file, session, self.tracks[i:i + per_sum]))
+            self.tracks = [t for f in futures for t in f.result()]

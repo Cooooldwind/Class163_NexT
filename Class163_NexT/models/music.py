@@ -58,16 +58,18 @@ class Music:
         if file: self.get_file(session)
 
     # Get & sort detail information
-    def get_detail(self, session: EncodeSession):
+    def get_detail(self, session: EncodeSession, pre_dict: dict|None = None):
         """
         获取音乐的详细信息，包括：歌曲名称、歌手、专辑等。
         :param session: 带有登录信息的用户会话。
+        :param pre_dict: （可选）预先准备好了的返回的数据。供歌单批量获取用，用户无需填写该字段。
         :return: NULL
         """
         detail_response = session.encoded_post(DETAIL_URL,
                                                {
                                                    "c": str([{"id": str(self.id)}])
-                                               }).json()["songs"][0]
+                                               }).json()["songs"][0] \
+        if pre_dict is None else pre_dict
         self.title = detail_response["name"]
         self.trans_title = detail_response["tns"][0] \
             if ("tns" in detail_response and len(detail_response["tns"]) > 0) \
@@ -97,10 +99,11 @@ class Music:
             else ""
 
     # Get & sort music file information
-    def get_file(self, session: EncodeSession):
+    def get_file(self, session: EncodeSession, pre_dict: dict|None = None):
         """
         获取音乐文件信息。
         :param session: 带有登录信息的用户会话。
+        :param pre_dict: （可选）预先准备好了的返回的数据。供歌单批量获取用，用户无需填写该字段。
         :return: NULL
         """
         file_response = session.encoded_post(FILE_URL,
@@ -108,7 +111,8 @@ class Music:
                                                  "ids": str([self.id]),
                                                  "level": QUALITY_LIST[self.quality],
                                                  "encodeType": QUALITY_FORMAT_LIST[self.quality]
-                                             }).json()["data"][0]
+                                             }).json()["data"][0] \
+        if pre_dict is None else pre_dict
         self.music_url = file_response["url"]
 
     def download_music(self, filename: str = "NULL"):
