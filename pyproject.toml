@@ -1,8 +1,8 @@
 [project]
 name = "Class163_NexT"
-version = "0.1.1"
+version = "0.1.2"
 description = "Download musics from the offical API of Netease Music."
-requires-python = ">=3.13"
+requires-python = ">=3.9"
 dependencies = [
     "netease-encode-api>=1.2.0",
     "selenium>=4.35.0",
@@ -15,9 +15,9 @@ where = ["Class163_NexT"]
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
-
 [dependency-groups]
 dev = [
     "build>=1.3.0",
     "twine>=6.2.0",
+    "vermin>=1.6.0",
 ]
