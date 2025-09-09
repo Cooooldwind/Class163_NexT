@@ -10,7 +10,7 @@ print("Login:",end="")
 print(end_time - start_time)
 
 start_time = time.time()
-pl2 = Playlist(s, 2391850012, detail=True, new=True)
+pl2 = Playlist(s, 2391850012, detail=True)
 sum2 = 0
 for t in pl2.tracks:
     sum2 += 1
