@@ -1,5 +1,8 @@
 from io import BytesIO
 import requests
+from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3, APIC
+from mutagen.flac import FLAC, Picture
 from netease_encode_api import EncodeSession
 
 DETAIL_URL = "https://music.163.com/weapi/v3/song/detail"
@@ -115,16 +118,17 @@ class Music:
         if pre_dict is None else pre_dict
         self.music_url = file_response["url"]
 
-    def download_music(self, filename: str = "NULL"):
+    def download_file(self, filename: str = "NULL"):
         """
         下载音乐。
         :param filename: （可选）文件名。若不填，文件将写入 self.music_data。这是一个 BytesIO 类型的变量。
         :return: NULL
         """
+        data: bytes = b""
         r = requests.get(self.music_url)
-        with open(f"{filename}.{"flac" if self.quality == 4 else "mp3"}", "wb") as f:
-            for chunk in r.iter_content(1024):
-                f.write(chunk)
+        for chunk in r.iter_content(1024):
+            data += chunk
+        self.music_data.write(data)
 
     def download_cover(self, filename: str = "NULL", pixel: int = -1):
         """
@@ -133,7 +137,59 @@ class Music:
         :param pixel: （可选）图片边长。若不填，图片边长将由网站决定。
         :return: NULL
         """
+        data: bytes = b""
         r = requests.get(f"{self.cover_url}?param={pixel}y{pixel}" if pixel > 0 else self.cover_url)
-        with (self.cover_data if filename == "NULL" else open(f"{filename}.jpg", "wb")) as f:
-            for chunk in r.iter_content(1024):
-                f.write(chunk)
+        for chunk in r.iter_content(1024):
+            data += chunk
+        self.cover_data.write(data)
+
+    def metadata_write(self):
+        if self.quality == 4:
+            self.music_data.seek(0)
+            self.cover_data.seek(0)
+            audio = FLAC(BytesIO(self.music_data.getvalue()))
+            audio["title"] = self.title
+            audio["album"] = self.album
+            audio["artist"] = self.artists
+            pic = Picture()
+            pic.data = self.cover_data.getvalue()
+            pic.type = 3
+            pic.mime = u"image/jpeg"
+            audio.clear_pictures()
+            audio.add_picture(pic)
+            self.music_data.seek(0)
+            audio.save(self.music_data)
+        else:
+            self.music_data.seek(0)
+            self.cover_data.seek(0)
+            audio = EasyID3(self.music_data)
+            audio["title"] = self.title
+            audio["album"] = self.album
+            audio["artist"] = self.artists
+            self.music_data.seek(0)
+            audio.save(self.music_data)
+            self.music_data = BytesIO(self.music_data.getvalue())
+            self.music_data.seek(0)
+            id3 = ID3(self.music_data)
+            id3.add(
+                APIC(
+                    encoding=3,  # utf-8
+                    mime='image/jpeg',  # 封面类型
+                    type=3,  # 3 = Front cover
+                    desc='Cover',
+                    data=self.cover_data.getvalue()
+                )
+            )
+            self.music_data.seek(0)
+            id3.save(self.music_data)
+
+    def save(self, filename: str, file: bool = False, cover: bool = False, lyric: bool = False):
+        if file:
+            with open(f"{filename}.{"flac" if self.quality == 4 else "mp3"}", "wb") as f:
+                f.write(self.music_data.getvalue())
+        if cover:
+            with open(f"{filename}.jpg", "wb") as f:
+                f.write(self.cover_data.getvalue())
+        if lyric:
+            with open(f"{filename}.lrc", "w", encoding="utf-8") as f:
+                f.write(self.lyric)
