@@ -15,6 +15,8 @@ m1.download_cover(pixel=2000)
 m1.metadata_write()
 m1.save(f"{m1.title}", True, True, True)
 
+time.sleep(1)
+
 m2.__init__(s_2, m2.id, 4,True, True, True)
 m2.download_file()
 m2.download_cover(pixel=2000)

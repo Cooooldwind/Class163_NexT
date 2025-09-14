@@ -1,7 +1,7 @@
 from io import BytesIO
 import requests
 from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3, APIC
+from mutagen.id3 import ID3, TIT2, TALB, TPE1,  APIC
 from mutagen.flac import FLAC, Picture
 from netease_encode_api import EncodeSession
 
@@ -15,23 +15,7 @@ QUALITY_FORMAT_LIST = ["", "mp3", "mp3", "mp3", "aac"]
 
 class Music:
 
-    # General information
-    id: int = -1
-    title: str = ""
-    trans_title: str = ""
-    subtitle: str = ""
-    artists: list[str] = []
-    album: str = ""
-    # Cover file
-    cover_url: str = ""
-    cover_data: BytesIO = BytesIO()
-    # Lyrics
-    lyric: str = ""
-    trans_lyric: str = ""
-    # Music file
-    music_url: str = ""
-    music_data: BytesIO = BytesIO()
-    quality: int = -1
+
 
     # Initialization
     def __init__(self,
@@ -50,9 +34,24 @@ class Music:
         :param lyric: （可选）同时获取歌词信息（lrc格式）。默认不获取，需要自己执行 get_lyric(session) 。
         :param file: （可选）同时获取音乐文件信息。默认不获取，需要自己执行 get_file(session) 。
         """
-        #Write ID & qualify required
+        # General information
         self.id = music_id
+        self.title: str = ""
+        self.trans_title: str = ""
+        self.subtitle: str = ""
+        self.artists: list[str] = []
+        self.album: str = ""
+        # Cover file
+        self.cover_url: str = ""
+        self.cover_data: BytesIO = BytesIO()
+        # Lyrics
+        self.lyric: str = ""
+        self.trans_lyric: str = ""
+        # Music file
+        self.music_url: str = ""
+        self.file_data: BytesIO = BytesIO()
         self.quality = quality
+
         # Get & sort detail information
         if detail: self.get_detail(session)
         # Get & sort lyric information
@@ -118,22 +117,21 @@ class Music:
         if pre_dict is None else pre_dict
         self.music_url = file_response["url"]
 
-    def download_file(self, filename: str = "NULL"):
+    def download_file(self):
         """
-        下载音乐。
-        :param filename: （可选）文件名。若不填，文件将写入 self.music_data。这是一个 BytesIO 类型的变量。
+        下载音乐。下载到内存。用 save 导出。
         :return: NULL
         """
         data: bytes = b""
         r = requests.get(self.music_url)
         for chunk in r.iter_content(1024):
             data += chunk
-        self.music_data.write(data)
+        self.file_data.write(data)
+        self.file_data.seek(0)
 
-    def download_cover(self, filename: str = "NULL", pixel: int = -1):
+    def download_cover(self, pixel: int = -1):
         """
-        下载专辑封面。
-        :param filename: （可选）文件名。若不填，文件将写入 self.cover_data。这是一个 BytesIO 类型的变量。
+        下载专辑封面。下载到内存。用 save 导出。
         :param pixel: （可选）图片边长。若不填，图片边长将由网站决定。
         :return: NULL
         """
@@ -142,54 +140,65 @@ class Music:
         for chunk in r.iter_content(1024):
             data += chunk
         self.cover_data.write(data)
+        self.file_data.seek(0)
 
     def metadata_write(self):
+        """
+        存储元数据。
+        :return: 
+        """
         if self.quality == 4:
-            self.music_data.seek(0)
-            self.cover_data.seek(0)
-            audio = FLAC(BytesIO(self.music_data.getvalue()))
+            self.file_data.seek(0)
+            audio = FLAC(self.file_data)
             audio["title"] = self.title
             audio["album"] = self.album
             audio["artist"] = self.artists
-            pic = Picture()
-            pic.data = self.cover_data.getvalue()
-            pic.type = 3
-            pic.mime = u"image/jpeg"
-            audio.clear_pictures()
-            audio.add_picture(pic)
-            self.music_data.seek(0)
-            audio.save(self.music_data)
+            if len(self.cover_data.getvalue()) > 0:
+                pic = Picture()
+                pic.data = self.cover_data.getvalue()
+                pic.type = 3
+                pic.mime = u"image/jpeg"
+                audio.clear_pictures()
+                audio.add_picture(pic)
+            self.file_data.seek(0)
+            audio.save(self.file_data)
         else:
-            self.music_data.seek(0)
-            self.cover_data.seek(0)
-            audio = EasyID3(self.music_data)
-            audio["title"] = self.title
-            audio["album"] = self.album
-            audio["artist"] = self.artists
-            self.music_data.seek(0)
-            audio.save(self.music_data)
-            self.music_data = BytesIO(self.music_data.getvalue())
-            self.music_data.seek(0)
-            id3 = ID3(self.music_data)
-            id3.add(
-                APIC(
-                    encoding=3,  # utf-8
-                    mime='image/jpeg',  # 封面类型
-                    type=3,  # 3 = Front cover
-                    desc='Cover',
-                    data=self.cover_data.getvalue()
+            self.file_data.seek(0)
+            id3 = ID3(self.file_data)
+            id3.add(TIT2(encoding=3, text=self.title))
+            id3.add(TPE1(encoding=3, text=self.artists))
+            id3.add(TALB(encoding=3, text=self.album))
+            if len(self.cover_data.getvalue()) > 0:
+                id3.add(
+                    APIC(
+                        encoding=3,  # utf-8
+                        mime='image/jpeg',  # 封面类型
+                        type=3,  # 3 = Front cover
+                        desc='Cover',
+                        data=self.cover_data.getvalue()
+                    )
                 )
-            )
-            self.music_data.seek(0)
-            id3.save(self.music_data)
+            self.file_data.seek(0)
+            id3.save(self.file_data)
 
-    def save(self, filename: str, file: bool = False, cover: bool = False, lyric: bool = False):
+    def save(self, filename: str, file: bool = False, cover: bool = False, lyric: bool = False, clean: bool = False):
+        """
+        导出
+        :param filename: 文件名。
+        :param file: 导出音乐文件。
+        :param cover: 导出封面文件。
+        :param lyric: 导出歌词文件。
+        :param clean: 清除内存里面的文件数据。如果电脑内存较小青将此项设置为 True。
+        """
         if file:
             with open(f"{filename}.{"flac" if self.quality == 4 else "mp3"}", "wb") as f:
-                f.write(self.music_data.getvalue())
+                f.write(self.file_data.getvalue())
+                if clean: self.file_data = BytesIO()
         if cover:
             with open(f"{filename}.jpg", "wb") as f:
                 f.write(self.cover_data.getvalue())
+                if clean: self.cover_data = BytesIO()
         if lyric:
             with open(f"{filename}.lrc", "w", encoding="utf-8") as f:
                 f.write(self.lyric)
+                if clean: self.lyric = ""
