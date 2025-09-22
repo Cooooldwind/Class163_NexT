@@ -1,12 +1,13 @@
 [project]
 name = "Class163_NexT"
-version = "0.2.0"
+version = "0.2.1"
 description = "Download musics from the offical API of Netease Music."
 requires-python = ">=3.9"
 dependencies = [
     "cryptography>=45.0.7",
     "mutagen>=1.47.0",
     "netease-encode-api>=1.2.0",
+    "playwright>=1.55.0",
     "selenium>=4.35.0",
 ]
 license = { text = "AGPL-3.0-or-later" }

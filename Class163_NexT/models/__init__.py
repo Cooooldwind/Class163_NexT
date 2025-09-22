@@ -6,6 +6,11 @@ SEARCH_URL = "https://music.163.com/weapi/cloudsearch/get/web"
 
 class Music163:
     def __init__(self, session: EncodeSession, key_word: str):
+        """
+        Class163类。这是一个全能类。
+        :param session: 用户会话。
+        :param key_word: 任何ID/URL/想搜索的词语。
+        """
         self.session = session
         self.music: Music = Music(session, -1)
         self.playlist: Playlist = Playlist(session, -1)
