@@ -1,6 +1,6 @@
 import concurrent.futures
 from netease_encode_api import EncodeSession
-from .music import Music
+from Class163_NexT.models.music import Music
 
 PLAYLIST_URL = "https://music.163.com/weapi/v6/playlist/detail"
 DETAIL_URL = "https://music.163.com/weapi/v3/song/detail"
@@ -41,52 +41,67 @@ def retail_get(session: EncodeSession, tracks: list[Music],
     return ret
 
 class Playlist:
-    id: int = -1
-    title: str = ""
-    creator: str = ""
-    create_timestamp: int = -1
-    last_update_timestamp: int = -1
-    description: str = ""
-    track_count: int = -1
-    tracks: list[Music] = []
 
     def __init__(self,
                  session: EncodeSession,
                  playlist_id: int,
                  quality: int = 1,
+                 info: bool = False,
                  detail: bool = False,
                  lyric: bool = False,
-                 file: bool = False):
+                 file: bool = False,
+                 info_pre_dict: dict|None = None):
+        if playlist_id < 0: return
         # Write ID
         self.id = playlist_id
+        self.title: str = ""
+        self.creator: str = ""
+        self.create_timestamp: int = -1
+        self.last_update_timestamp: int = -1
+        self.description: str = ""
+        self.track_count: int = -1
+        self.tracks: list[Music] = []
         # Get & sort playlist information
-        playlist_response = session.encoded_post(PLAYLIST_URL, {"id": self.id}).json()["playlist"]
+        if info: self.get_info(session, info_pre_dict if info_pre_dict else None)
+        # Deal with tracks in concurrent.futures. Optimized in 0.1.3. Didn't test.
+        if detail: self.get_detail(session)
+        if lyric: self.get_lyric(session)
+        if file: self.get_file(session)
+
+    def get_info(self, session: EncodeSession, pre_dict: dict|None = None):
+        playlist_response = session.encoded_post(PLAYLIST_URL, {"id": self.id}).json()["playlist"] \
+                            if pre_dict is None else pre_dict
         self.title = playlist_response["name"]
         self.creator = playlist_response["creator"]["nickname"]
-        self.create_timestamp = playlist_response["createTime"]
-        self.last_update_timestamp = playlist_response["updateTime"]
+        self.create_timestamp = playlist_response["createTime"] if "createTime" in playlist_response else -1
+        self.last_update_timestamp = playlist_response["updateTime"] if "updateTime" in playlist_response else -1
         self.description = playlist_response["description"]
         self.track_count = playlist_response["trackCount"]
-        self.tracks = [Music(EncodeSession(), track["id"]) for track in playlist_response["trackIds"]]
-        # Deal with tracks in concurrent.futures. Optimized in 0.1.3. Didn't test.
+        self.tracks = [Music(EncodeSession(), track["id"]) for track in playlist_response["trackIds"]] if "trackIds" in playlist_response else []
+
+    def get_detail(self, session: EncodeSession):
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             per_sum = 10 ** (len(str(self.track_count)) - 1)
             for i in range(0, self.track_count, per_sum):
-                futures.append(executor.submit(retail_get,
+                futures.append(executor.submit(retail_get_tracks_detail,
+                                               session,
+                                               self.tracks[i:i + per_sum]))
+            self.tracks = [t for f in futures for t in f.result()]
+
+    def get_file(self, session: EncodeSession, quality: int = 1):
+        futures = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            per_sum = 10 ** (len(str(self.track_count)) - 1)
+            for i in range(0, self.track_count, per_sum):
+                futures.append(executor.submit(retail_get_tracks_file,
                                                session,
                                                self.tracks[i:i + per_sum],
-                                               quality, detail, file))
+                                               quality))
             self.tracks = [t for f in futures for t in f.result()]
-        if lyric:
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                for i in self.tracks:
-                    futures.append(executor.submit(i.__init__, session, i.id, quality, lyric))
-        """
-        if file:
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                per_sum = 10 ** (len(str(self.track_count)) - 1)
-                for i in range(0, self.track_count, per_sum):
-                    futures.append(executor.submit(retail_get_tracks_file, session, self.tracks[i:i + per_sum]))
-            self.tracks = [t for f in futures for t in f.result()]
-        """
+
+    def get_lyric(self, session: EncodeSession):
+        futures = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            for i in self.tracks:
+                futures.append(executor.submit(i.get_lyric, session))

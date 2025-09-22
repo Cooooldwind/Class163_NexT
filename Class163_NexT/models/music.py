@@ -15,8 +15,6 @@ QUALITY_FORMAT_LIST = ["", "mp3", "mp3", "mp3", "aac"]
 
 class Music:
 
-
-
     # Initialization
     def __init__(self,
                  session: EncodeSession,
@@ -24,7 +22,9 @@ class Music:
                  quality: int = 1,
                  detail: bool = False,
                  lyric: bool = False,
-                 file: bool = False):
+                 file: bool = False,
+                 detail_pre_dict: dict|None = None,
+                 file_pre_dict: dict|None = None):
         """
         初始化一个 Music 类。
         :param session: 带有登录信息的用户会话。
@@ -34,6 +34,7 @@ class Music:
         :param lyric: （可选）同时获取歌词信息（lrc格式）。默认不获取，需要自己执行 get_lyric(session) 。
         :param file: （可选）同时获取音乐文件信息。默认不获取，需要自己执行 get_file(session) 。
         """
+        if music_id < 0: return
         # General information
         self.id = music_id
         self.title: str = ""
@@ -51,13 +52,12 @@ class Music:
         self.music_url: str = ""
         self.file_data: BytesIO = BytesIO()
         self.quality = quality
-
         # Get & sort detail information
-        if detail: self.get_detail(session)
+        if detail: self.get_detail(session, detail_pre_dict)
         # Get & sort lyric information
         if lyric: self.get_lyric(session)
         # Get & sort music file information
-        if file: self.get_file(session)
+        if file: self.get_file(session, file_pre_dict)
 
     # Get & sort detail information
     def get_detail(self, session: EncodeSession, pre_dict: dict|None = None):
@@ -117,26 +117,26 @@ class Music:
         if pre_dict is None else pre_dict
         self.music_url = file_response["url"]
 
-    def download_file(self):
+    def download_file(self, session: EncodeSession):
         """
         下载音乐。下载到内存。用 save 导出。
         :return: NULL
         """
         data: bytes = b""
-        r = requests.get(self.music_url)
+        r = session.get(self.music_url)
         for chunk in r.iter_content(1024):
             data += chunk
         self.file_data.write(data)
         self.file_data.seek(0)
 
-    def download_cover(self, pixel: int = -1):
+    def download_cover(self, session: EncodeSession, pixel: int = -1):
         """
         下载专辑封面。下载到内存。用 save 导出。
         :param pixel: （可选）图片边长。若不填，图片边长将由网站决定。
         :return: NULL
         """
         data: bytes = b""
-        r = requests.get(f"{self.cover_url}?param={pixel}y{pixel}" if pixel > 0 else self.cover_url)
+        r = session.get(f"{self.cover_url}?param={pixel}y{pixel}" if pixel > 0 else self.cover_url)
         for chunk in r.iter_content(1024):
             data += chunk
         self.cover_data.write(data)
