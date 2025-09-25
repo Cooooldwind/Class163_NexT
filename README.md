@@ -142,7 +142,7 @@ playlist.get_file(session, quality=2)
 ```python
 from class163_next.models import Music163
 
-search = Music163(session, "关键词")
+search = Class163(session, "关键词")
 musics = search.music_search_results       # 单曲搜索结果
 playlists = search.playlist_search_results # 播放列表搜索结果
 ```

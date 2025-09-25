@@ -4,7 +4,7 @@ from .playlist import Playlist
 
 SEARCH_URL = "https://music.163.com/weapi/cloudsearch/get/web"
 
-class Music163:
+class Class163:
     def __init__(self, session: EncodeSession, key_word: str):
         """
         Class163类。这是一个全能类。
