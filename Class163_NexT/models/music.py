@@ -10,8 +10,8 @@ FILE_URL = "https://music.163.com/weapi/song/enhance/player/url/v1"
 LYRIC_URL = "https://music.163.com/weapi/song/lyric"
 SEARCH_URL = "https://music.163.com/weapi/cloudsearch/get/web"
 
-QUALITY_LIST = ["", "standard", "higher", "exhigh", "lossless"]
-QUALITY_FORMAT_LIST = ["", "mp3", "mp3", "mp3", "aac"]
+QUALITY_LIST = ["", "standard", "higher", "exhigh", "lossless", "hires", "jyeffect", "jymaster"]
+QUALITY_FORMAT_LIST = ["", "mp3", "mp3", "mp3", "aac", "aac", "aac", "aac"]
 
 class Music:
 

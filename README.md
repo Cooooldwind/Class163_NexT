@@ -1,8 +1,12 @@
 # Class163\_NexT
 
-[![PyPI version](https://img.shields.io/pypi/v/class163-next.svg)](https://pypi.org/project/class163-next/)
-[![Python Version](https://img.shields.io/pypi/pyversions/class163-next.svg)](https://pypi.org/project/class163-next/)
+[![PyPI version](https://img.shields.io/pypi/v/Class163_NexT?label=Latest)](https://pypi.org/project/class163-next/)
+[![Python Version](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fgithub.com%2FCooooldwind%2FClass163_NexT%2Fraw%2Frefs%2Fheads%2Fmain%2Fpyproject.toml
+)](https://pypi.org/project/class163-next/)
 [![License](https://img.shields.io/pypi/l/class163-next.svg)](https://github.com/Cooooldwind/Class163_NexT/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/CooooldWind/Class163_NexT)](https://github.com/Cooooldwind/Class163_NexT/)
+
+
 
 Class163\_NexT 是一个 Python 库，用于操作网易云音乐，包括获取音乐信息、歌词、音乐文件、播放列表以及自动登录管理 Cookies。支持批量处理、多音质下载、内存中处理和本地保存音乐文件。
 
@@ -114,14 +118,6 @@ music.save("song_with_metadata", file=True, cover=True, lyric=True)
 * 对于无损 FLAC 文件，会写入 FLAC 元数据和封面。
 * 支持歌词导出为 LRC 文件。
 
-
-* `quality` 参数：
-
-  * `1`：标准音质（128kbps MP3）
-  * `2`：更高音质（192kbps MP3）
-  * `3`：极高音质（320kbps MP3）
-  * `4`：无损音质（AAC / FLAC）
-
 ---
 
 ### 4. 获取播放列表信息
@@ -153,12 +149,17 @@ playlists = search.playlist_search_results # 播放列表搜索结果
 
 ## 支持音质
 
-| 序号 | 音质       | 编码格式       | 码率|
-|----| -------- | ---------- |--|
-| 1  | standard  | mp3        |128kbps|
-| 2  | higher   | mp3        |192kbps|
-| 3  | exhigh   | mp3        |320kbps|
-| 4  | lossless | aac / flac |最高48kHz/16bit|
+| 序号 | 显示名    | API命名    | 编码格式       | 码率              |
+|----|--------|----------|------------|-----------------|
+| 1  | 标准     | standard | mp3        | 128kbps         |
+| 2  | 较高     | higher   | mp3        | 192kbps         |
+| 3  | 极高     | exhigh   | mp3        | 320kbps         |
+| 4  | 无损     | lossless | aac (flac) | 最高 48kHz/16bit  |
+| 5  | 高解析度无损 | hires    | aac (flac) | 最高 192kHz/24bit |
+| 6  | 高清臻音   | jyeffect | aac (flac) | 96kHz/24bit     |
+| 7  | 超清母带   | jymaster | aac (flac) | 192kHz/24bit    |
+
+###### 备注：较高音质已经从客户端消失了；高清臻音和超清母带格式可能会有 AI 合成的参与（强行拉到相应码率），而无损和高解析度无损只会对版权方上传的码率过高的音频做压缩处理。
 
 ---
 
@@ -179,4 +180,4 @@ Class163\_NexT 仅提供技术工具**用于学习、研究和个人备份用途
 
 ---
 
-###### Written by $ChatGPT^{TM}$ & $CooooldWind$.
+###### Written by $CooooldWind$ & $ChatGPT^{TM}$.
