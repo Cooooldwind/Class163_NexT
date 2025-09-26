@@ -1,4 +1,5 @@
 from netease_encode_api import EncodeSession
+from utils.safe_run import safe_run
 from .music import Music
 from .playlist import Playlist
 

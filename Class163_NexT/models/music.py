@@ -1,6 +1,5 @@
 from io import BytesIO
-import requests
-from mutagen.easyid3 import EasyID3
+from utils.safe_run import safe_run
 from mutagen.id3 import ID3, TIT2, TALB, TPE1,  APIC
 from mutagen.flac import FLAC, Picture
 from netease_encode_api import EncodeSession
@@ -10,12 +9,14 @@ FILE_URL = "https://music.163.com/weapi/song/enhance/player/url/v1"
 LYRIC_URL = "https://music.163.com/weapi/song/lyric"
 SEARCH_URL = "https://music.163.com/weapi/cloudsearch/get/web"
 
+# noinspection SpellCheckingInspection
 QUALITY_LIST = ["", "standard", "higher", "exhigh", "lossless", "hires", "jyeffect", "jymaster"]
 QUALITY_FORMAT_LIST = ["", "mp3", "mp3", "mp3", "aac", "aac", "aac", "aac"]
 
 class Music:
 
     # Initialization
+    @safe_run
     def __init__(self,
                  session: EncodeSession,
                  music_id: int,
@@ -60,6 +61,7 @@ class Music:
         if file: self.get_file(session, file_pre_dict)
 
     # Get & sort detail information
+    @safe_run
     def get_detail(self, session: EncodeSession, pre_dict: dict|None = None):
         """
         获取音乐的详细信息，包括：歌曲名称、歌手、专辑等。
@@ -84,6 +86,7 @@ class Music:
         self.cover_url = detail_response["al"]["picUrl"]
 
     # Get & sort lyric information
+    @safe_run
     def get_lyric(self, session: EncodeSession):
         """
         获取歌词信息（lrc格式）。
@@ -101,6 +104,7 @@ class Music:
             else ""
 
     # Get & sort music file information
+    @safe_run
     def get_file(self, session: EncodeSession, pre_dict: dict|None = None):
         """
         获取音乐文件信息。
@@ -117,6 +121,7 @@ class Music:
         if pre_dict is None else pre_dict
         self.music_url = file_response["url"]
 
+    @safe_run
     def download_file(self, session: EncodeSession):
         """
         下载音乐。下载到内存。用 save 导出。
@@ -129,6 +134,7 @@ class Music:
         self.file_data.write(data)
         self.file_data.seek(0)
 
+    @safe_run
     def download_cover(self, session: EncodeSession, pixel: int = -1):
         """
         下载专辑封面。下载到内存。用 save 导出。
@@ -142,6 +148,7 @@ class Music:
         self.cover_data.write(data)
         self.file_data.seek(0)
 
+    @safe_run
     def metadata_write(self):
         """
         存储元数据。
@@ -181,6 +188,7 @@ class Music:
             self.file_data.seek(0)
             id3.save(self.file_data)
 
+    @safe_run
     def save(self, filename: str, file: bool = False, cover: bool = False, lyric: bool = False, clean: bool = False):
         """
         导出

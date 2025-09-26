@@ -1,4 +1,5 @@
 import concurrent.futures
+from utils.safe_run import safe_run
 from netease_encode_api import EncodeSession
 from Class163_NexT.models.music import Music
 
@@ -9,6 +10,7 @@ FILE_URL = "https://music.163.com/weapi/song/enhance/player/url/v1"
 QUALITY_LIST = ["", "standard", "higher", "exhigh", "lossless"]
 QUALITY_FORMAT_LIST = ["", "mp3", "mp3", "mp3", "aac"]
 
+@safe_run
 def retail_get_tracks_detail(session: EncodeSession, tracks: list[Music]) -> list[Music]:
     detail_response = session.encoded_post(DETAIL_URL,
                                            {
@@ -18,6 +20,7 @@ def retail_get_tracks_detail(session: EncodeSession, tracks: list[Music]) -> lis
     for index, track in enumerate(ret): track.get_detail(EncodeSession(), detail_response[index])
     return ret
 
+@safe_run
 def retail_get_tracks_file(session: EncodeSession, tracks: list[Music], quality: int = 1) -> list[Music]:
     file_response = session.encoded_post(FILE_URL,
                                            {
@@ -30,6 +33,7 @@ def retail_get_tracks_file(session: EncodeSession, tracks: list[Music], quality:
     for index, track in enumerate(ret): track.get_file(EncodeSession(), file_response[index])
     return ret
 
+@safe_run
 def retail_get(session: EncodeSession, tracks: list[Music],
                quality: int = 1,
                detail: bool = False,
@@ -42,6 +46,7 @@ def retail_get(session: EncodeSession, tracks: list[Music],
 
 class Playlist:
 
+    @safe_run
     def __init__(self,
                  session: EncodeSession,
                  playlist_id: int,
@@ -68,6 +73,7 @@ class Playlist:
         if lyric: self.get_lyric(session)
         if file: self.get_file(session)
 
+    @safe_run
     def get_info(self, session: EncodeSession, pre_dict: dict|None = None):
         playlist_response = session.encoded_post(PLAYLIST_URL, {"id": self.id}).json()["playlist"] \
                             if pre_dict is None else pre_dict
@@ -79,6 +85,7 @@ class Playlist:
         self.track_count = playlist_response["trackCount"]
         self.tracks = [Music(EncodeSession(), track["id"]) for track in playlist_response["trackIds"]] if "trackIds" in playlist_response else []
 
+    @safe_run
     def get_detail(self, session: EncodeSession):
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -89,6 +96,7 @@ class Playlist:
                                                self.tracks[i:i + per_sum]))
             self.tracks = [t for f in futures for t in f.result()]
 
+    @safe_run
     def get_file(self, session: EncodeSession, quality: int = 1):
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -100,6 +108,7 @@ class Playlist:
                                                quality))
             self.tracks = [t for f in futures for t in f.result()]
 
+    @safe_run
     def get_lyric(self, session: EncodeSession):
         futures = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
