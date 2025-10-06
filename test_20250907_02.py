@@ -1,3 +1,0 @@
-from Class163_NexT.selenium_login import download_and_unzip_driver
-
-download_and_unzip_driver()
