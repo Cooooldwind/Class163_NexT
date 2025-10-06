@@ -1,5 +1,5 @@
 from netease_encode_api import EncodeSession
-from utils.safe_run import safe_run
+from ..utils import safe_run
 from .music import Music
 from .playlist import Playlist
 
@@ -13,12 +13,12 @@ class Class163:
         :param key_word: 任何ID/URL/想搜索的词语。
         """
         self.session = session
-        self.music: Music = Music(session, -1)
-        self.playlist: Playlist = Playlist(session, -1)
+        self.music: Music = Music(session)
+        self.playlist: Playlist = Playlist(session)
         self.music_search_results: list[Music] = []
         self.playlist_search_results: list[Playlist] = []
         # Check playlist / music.
-        if type(key_word) is str and key_word.find("music.163.com") >= 0:
+        if key_word.find("music.163.com") >= 0:
             if key_word.find("playlist?id=") >= 0:
                 key_word = int(key_word[(key_word.find("playlist?id=") + 12):key_word.find("&uct2=")])
                 self.playlist = Playlist(session, key_word)
@@ -26,15 +26,20 @@ class Class163:
                 key_word = int(key_word[(key_word.find("song?id=") + 8):key_word.find("&uct2=")])
                 self.music = Music(session, key_word)
         # Search: music result & playlist result
-        try:
-            int(key_word)
-        except ValueError: pass
         else:
-            self.music = Music(session, int(key_word))
-            self.playlist = Playlist(session, int(key_word))
-        self.search_music(session, str(key_word))
-        self.search_playlist(session, str(key_word))
+            try:
+                int(key_word)
+            # Not URL or ID
+            except ValueError: 
+                self.search_music(session, str(key_word))
+                self.search_playlist(session, str(key_word))
+            else:
+                self.music = Music(session, int(key_word))
+                self.playlist = Playlist(session, int(key_word))
+        
+        
 
+    @safe_run
     def search_music(self, session: EncodeSession, key_word: str):
         data = {
             "s": key_word,
@@ -53,6 +58,7 @@ class Class163:
         self.music_search_results = ret
         return
 
+    @safe_run
     def search_playlist(self, session: EncodeSession, key_word: str):
         data = {
             "s": key_word,

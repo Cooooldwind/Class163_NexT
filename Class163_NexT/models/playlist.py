@@ -1,5 +1,5 @@
 import concurrent.futures
-from utils.safe_run import safe_run
+from ..utils import safe_run
 from netease_encode_api import EncodeSession
 from Class163_NexT.models.music import Music
 

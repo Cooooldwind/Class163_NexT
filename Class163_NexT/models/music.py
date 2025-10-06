@@ -1,5 +1,5 @@
 from io import BytesIO
-from utils.safe_run import safe_run
+from ..utils import safe_run
 from mutagen.id3 import ID3, TIT2, TALB, TPE1,  APIC
 from mutagen.flac import FLAC, Picture
 from netease_encode_api import EncodeSession
