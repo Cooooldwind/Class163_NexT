@@ -20,11 +20,11 @@ class Class163:
         # Check playlist / music.
         if key_word.find("music.163.com") >= 0:
             if key_word.find("playlist?id=") >= 0:
-                key_word = int(key_word[(key_word.find("playlist?id=") + 12):key_word.find("&uct2=")])
-                self.playlist = Playlist(session, key_word)
+                playlist_id = int(key_word[(key_word.find("playlist?id=") + 12):key_word.find("&uct2=")])
+                self.playlist = Playlist(session=session, playlist_id=playlist_id)
             elif key_word.find("song?id=") >= 0:
-                key_word = int(key_word[(key_word.find("song?id=") + 8):key_word.find("&uct2=")])
-                self.music = Music(session, key_word)
+                music_id = int(key_word[(key_word.find("song?id=") + 8):key_word.find("&uct2=")])
+                self.music = Music(session=session, music_id=music_id)
         # Search: music result & playlist result
         else:
             try:
