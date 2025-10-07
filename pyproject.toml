@@ -1,6 +1,6 @@
 [project]
 name = "Class163_NexT"
-version = "0.3.9"
+version = "0.3.10"
 description = "Download musics from the offical API of Netease Music."
 requires-python = ">=3.9"
 dependencies = [
@@ -14,7 +14,8 @@ license = { text = "AGPL-3.0-or-later" }
 authors = [{name="CooooldWind_",email="3091868003@qq.com"}]
 readme = "README.md"
 [tool.setuptools.packages.find]
-where = ["Class163_NexT"]
+where = ["."]
+include = ["Class163_NexT*"]
 [[tool.uv.index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 default = true
