@@ -13,8 +13,8 @@ class Class163:
         :param key_word: 任何ID/URL/想搜索的词语。
         """
         self.session = session
-        self.music: Music = Music(session)
-        self.playlist: Playlist = Playlist(session)
+        self.music: Music = Music(session, 0)
+        self.playlist: Playlist = Playlist(session, 0)
         self.music_search_results: list[Music] = []
         self.playlist_search_results: list[Playlist] = []
         # Check playlist / music.
@@ -34,8 +34,8 @@ class Class163:
                 self.search_music(session, str(key_word))
                 self.search_playlist(session, str(key_word))
             else:
-                self.music = Music(session, int(key_word))
-                self.playlist = Playlist(session, int(key_word))
+                self.music = Music(session=session, music_id=int(key_word))
+                self.playlist = Playlist(session=session, playlist_id=int(key_word))
         
         
 
