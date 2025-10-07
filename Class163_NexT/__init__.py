@@ -6,7 +6,7 @@ Class163_NexT - 网易云音乐下载API库
 from .models import Music, Playlist, Class163
 from .utils import safe_run, selenium_login, playwright_login
 
-__version__ = "0.3.5"
+__version__ = "0.3.7"
 __all__ = [
     "Music", 
     "Playlist", 
