@@ -29,7 +29,7 @@ jobs:
       - name: Build package
         run: |
           rm -rf dist/
-          python -m Build
+          python -m build --wheel
 
       - name: Publish to PyPI via Trusted Publisher
         uses: pypa/gh-action-pypi-publish@release/v1
