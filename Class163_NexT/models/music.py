@@ -120,7 +120,6 @@ class Music:
                                              }).json()["data"][0] \
         if pre_dict is None else pre_dict
         self.music_url = file_response["url"]
-        self.quality = QUALITY_LIST.index(file_response["level"])
 
     @safe_run
     def download_file(self, session: EncodeSession):

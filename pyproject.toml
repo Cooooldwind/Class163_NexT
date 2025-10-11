@@ -1,6 +1,6 @@
 [project]
 name = "Class163_NexT"
-version = "0.3.14"
+version = "0.3.15"
 description = "Download musics from the offical API of Netease Music."
 requires-python = ">=3.9"
 dependencies = [
