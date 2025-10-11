@@ -54,7 +54,7 @@ class Class163:
         for i in range(0, count, 100):
             data["offset"] = str(i)
             response = session.encoded_post(SEARCH_URL, data).json()["result"]
-            ret += [Music(session, m["al"]["id"], detail=True, detail_pre_dict=m) for m in response["songs"]]
+            ret += [Music(session, m["id"], detail=True, detail_pre_dict=m) for m in response["songs"]]
         self.music_search_results = ret
         return
 
