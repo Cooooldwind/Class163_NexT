@@ -6,5 +6,6 @@ m=Class163(session=s, key_word="https://music.163.com/song?id=2736357221&uct2=U2
 m=m.music
 m.get_detail(session=s)
 m.quality = 6
-m.get_file(session=s)
+m.download_cover(s, pixel=600)
+m.save("test", cover=True)
 print(m.quality)

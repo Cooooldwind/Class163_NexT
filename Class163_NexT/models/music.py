@@ -146,7 +146,7 @@ class Music:
         for chunk in r.iter_content(1024):
             data += chunk
         self.cover_data.write(data)
-        self.file_data.seek(0)
+        self.cover_data.seek(0)
 
     @safe_run
     def metadata_write(self):
