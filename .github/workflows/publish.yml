@@ -1,0 +1,35 @@
+name: Upload Python Package to PyPI
+
+on:
+  push:
+    tags:
+      - "*"   # 打 tag 才触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # 允许 OIDC
+      contents: read   # 允许读取仓库内容
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build package
+        run: |
+          rm -rf dist/
+          python -m build
+
+      - name: Publish to PyPI via Trusted Publisher
+        uses: pypa/gh-action-pypi-publish@release/v1
