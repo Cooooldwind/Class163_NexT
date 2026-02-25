@@ -20,7 +20,7 @@ def main():
     # 启动FastAPI服务
     try:
         subprocess.run(
-            [sys.executable, "-m", "uvicorn", "api.main:app", "--reload", "--port", "16360"],
+            [sys.executable, "-m", "uvicorn", "Class163_NexT_API.main:app", "--reload", "--port", "16360"],
             check=True
         )
     except KeyboardInterrupt:

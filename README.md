@@ -1,183 +1,403 @@
-# Class163\_NexT
+# Class163_NexT API 文档
 
-[![PyPI version](https://img.shields.io/pypi/v/Class163_NexT?label=Latest)](https://pypi.org/project/class163-next/)
-[![Python Version](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fgithub.com%2FCooooldwind%2FClass163_NexT%2Fraw%2Frefs%2Fheads%2Fmain%2Fpyproject.toml
-)](https://pypi.org/project/class163-next/)
-[![License](https://img.shields.io/pypi/l/class163-next.svg)](https://github.com/Cooooldwind/Class163_NexT/blob/main/LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/CooooldWind/Class163_NexT)](https://github.com/Cooooldwind/Class163_NexT/)
+## 基础信息
 
-
-
-Class163\_NexT 是一个 Python 库，用于操作网易云音乐，包括获取音乐信息、歌词、音乐文件、播放列表以及自动登录管理 Cookies。支持批量处理、多音质下载、内存中处理和本地保存音乐文件。
+- **基础URL**: `http://127.0.0.1:16360`
+- **API前缀**: `/api`
+- **文档地址**: `http://127.0.0.1:16360/docs` (Swagger UI)
+- **备用文档**: `http://127.0.0.1:16360/redoc` (ReDoc)
 
 ---
 
-## 功能概览
+## 通用说明
 
-* **音乐获取**
+### 认证
+所有API接口都需要有效的登录会话。如果未登录，将返回 `401` 错误：
+```json
+{
+  "detail": "未找到有效会话，请先登录"
+}
+```
 
-  * 获取单曲详细信息（标题、歌手、专辑、封面）。
-  * 获取歌词（LRC 格式）。
-  * 下载音乐文件（支持 MP3、AAC、FLAC 等音质）。
-  * 下载专辑封面。
-  * 写入音乐文件元数据（ID3 / FLAC）。
+### 通用错误码
 
-* **播放列表管理**
-
-  * 获取播放列表信息（标题、创建者、描述、歌曲列表）。
-  * 批量获取歌曲详情、歌词和文件。
-  * 并发优化，提高批量处理效率。
-
-* **搜索功能**
-
-  * 根据关键词搜索单曲或播放列表。
-  * 支持 ID 或 URL 自动识别。
-  * 返回批量搜索结果。
-
-* **登录与 Cookies 管理**
-
-  * 自动检测并加载已保存的 Cookies。
-  * Playwright 或 Selenium 自动登录获取网易云音乐 Cookies。
-  * 加密存储 Cookies，确保安全。
+| 状态码 | 说明 |
+|--------|------|
+| 200 | 请求成功 |
+| 301/302/307 | 重定向（用于文件和封面下载） |
+| 401 | 未认证，需要登录 |
+| 404 | 资源未找到 |
+| 500 | 服务器内部错误 |
 
 ---
 
-## 安装
+## 接口列表
 
-通过 PyPI 安装：
+### 1. 基础接口
+
+#### 1.1 健康检查
+```
+GET /health
+```
+
+**响应示例**:
+```json
+{
+  "status": "healthy"
+}
+```
+
+---
+
+### 2. 音乐接口
+
+#### 2.1 获取音乐信息
+```
+GET /api/music/info/{music_id}
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| music_id | int | 是 | 音乐ID |
+| detail | bool | 否 | 是否获取详细信息，默认 `true` |
+
+**响应示例**:
+```json
+{
+  "id": 3342707944,
+  "title": "系在蝴蝶上的红线 中文填词 feat. 夢ノ結唱 POPY",
+  "artists": ["遠山霞", "CooooldWind"],
+  "album": "系在蝴蝶上的红线 中文填词 feat. 夢ノ結唱 POPY",
+  "cover_url": "https://p1.music.126.net/xxx.jpg"
+}
+```
+
+---
+
+#### 2.2 获取音乐文件（重定向）
+```
+GET /api/music/file/{music_id}
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| music_id | int | 是 | 音乐ID |
+| quality | int | 否 | 音质等级，默认 `1` |
+
+**音质等级说明**:
+
+| 等级 | 说明 |
+|------|------|
+| 1 | 标准 (128kbps MP3) |
+| 2 | 较高 (192kbps MP3) |
+| 3 | 极高 (320kbps MP3) |
+| 4 | 无损 (FLAC) |
+| 5 | 高解析度无损 (Hi-Res) |
+
+**响应**: 返回 `307` 重定向到音乐文件下载链接
+
+---
+
+#### 2.3 获取音乐歌词
+```
+GET /api/music/lyric/{music_id}
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| music_id | int | 是 | 音乐ID |
+
+**响应示例**:
+```json
+{
+  "id": 3342707944,
+  "title": "系在蝴蝶上的红线 中文填词 feat. 夢ノ結唱 POPY",
+  "artists": ["遠山霞", "CooooldWind"],
+  "lyric": "[00:00.672]几年前送给我的那捧花..."
+}
+```
+
+---
+
+#### 2.4 获取音乐封面（重定向）
+```
+GET /api/music/cover/{music_id}
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| music_id | int | 是 | 音乐ID |
+
+**响应**: 返回 `307` 重定向到封面图片链接
+
+---
+
+### 3. 播放列表接口
+
+#### 3.1 获取播放列表信息
+```
+GET /api/playlist/info/{playlist_id}
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| playlist_id | int | 是 | 播放列表ID |
+| info | bool | 否 | 是否获取基本信息，默认 `true` |
+| detail | bool | 否 | 是否获取歌曲详情，默认 `false` |
+
+**响应示例** (detail=false):
+```json
+{
+  "id": 2391850012,
+  "title": "Cooooldwind_喜欢的音乐",
+  "creator": "Cooooldwind",
+  "description": "",
+  "track_count": 2253,
+  "create_time": "2017-08-15 14:30:25",
+  "update_time": "2025-02-25 10:15:30"
+}
+```
+
+**响应示例** (detail=true):
+```json
+{
+  "id": 2391850012,
+  "title": "Cooooldwind_喜欢的音乐",
+  "creator": "Cooooldwind",
+  "description": "",
+  "track_count": 2253,
+  "create_time": "2017-08-15 14:30:25",
+  "update_time": "2025-02-25 10:15:30",
+  "songs": [
+    {
+      "id": 5239040,
+      "title": "味道",
+      "artists": ["辛晓琪"],
+      "album": "滚石30周年精选珍藏集"
+    }
+  ]
+}
+```
+
+---
+
+#### 3.2 获取播放列表歌曲
+```
+GET /api/playlist/songs/{playlist_id}
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| playlist_id | int | 是 | 播放列表ID |
+| limit | int | 否 | 返回数量限制 |
+| offset | int | 否 | 偏移量，默认 `0` |
+
+**响应示例**:
+```json
+{
+  "id": 2391850012,
+  "title": "Cooooldwind_喜欢的音乐",
+  "total_songs": 2253,
+  "offset": 0,
+  "limit": 5,
+  "songs": [
+    {
+      "id": 5239040,
+      "title": "味道",
+      "artists": ["辛晓琪"],
+      "album": "滚石30周年精选珍藏集"
+    }
+  ]
+}
+```
+
+---
+
+#### 3.3 获取播放列表封面（重定向）
+```
+GET /api/playlist/cover/{playlist_id}
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| playlist_id | int | 是 | 播放列表ID |
+
+**响应**: 返回 `307` 重定向到封面图片链接
+
+---
+
+### 4. 搜索接口
+
+#### 4.1 综合搜索
+```
+GET /api/search/
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| keyword | str | 是 | 搜索关键词 |
+| type | str | 否 | 搜索类型：`music`/`playlist`/`all`，默认 `all` |
+| limit | int | 否 | 返回数量，默认 `10` |
+
+**响应示例**:
+```json
+{
+  "music_results": [
+    {
+      "id": 2142857204,
+      "title": "雑踏、僕らの街",
+      "artists": ["トゲナシトゲアリ"],
+      "album": "雑踏、僕らの街"
+    }
+  ],
+  "playlist_results": [
+    {
+      "id": 9855521527,
+      "title": "トゲナシトゲアリ【闺泣】音乐全收录",
+      "creator": "悦子DRG_Cer",
+      "track_count": 113
+    }
+  ]
+}
+```
+
+---
+
+#### 4.2 搜索音乐
+```
+GET /api/search/music
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| keyword | str | 是 | 搜索关键词 |
+| limit | int | 否 | 返回数量，默认 `10` |
+
+**响应示例**:
+```json
+{
+  "keyword": "トゲナシトゲアリ",
+  "music_results": [
+    {
+      "id": 2142857204,
+      "title": "雑踏、僕らの街",
+      "artists": ["トゲナシトゲアリ"],
+      "album": "雑踏、僕らの街"
+    }
+  ],
+  "total": 193
+}
+```
+
+---
+
+#### 4.3 搜索播放列表
+```
+GET /api/search/playlist
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| keyword | str | 是 | 搜索关键词 |
+| limit | int | 否 | 返回数量，默认 `10` |
+
+**响应示例**:
+```json
+{
+  "keyword": "トゲナシトゲアリ",
+  "playlist_results": [
+    {
+      "id": 9855521527,
+      "title": "トゲナシトゲアリ【闺泣】音乐全收录",
+      "creator": "悦子DRG_Cer",
+      "track_count": 113
+    }
+  ],
+  "total": 93
+}
+```
+
+---
+
+## 数据模型
+
+### Music (音乐)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 音乐ID |
+| title | str | 歌曲标题 |
+| artists | list[str] | 艺术家列表 |
+| album | str | 专辑名称 |
+| cover_url | str | 封面图片URL |
+| lyric | str | 歌词内容（LRC格式） |
+
+### Playlist (播放列表)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 播放列表ID |
+| title | str | 列表标题 |
+| creator | str | 创建者昵称 |
+| description | str | 列表描述 |
+| track_count | int | 歌曲总数 |
+| create_time | str | 创建时间，格式 `YYYY-MM-DD HH:MM:SS` |
+| update_time | str | 更新时间，格式 `YYYY-MM-DD HH:MM:SS` |
+| songs | list[Music] | 歌曲列表（detail=true时返回） |
+
+---
+
+## 测试数据
+
+为了方便测试，可以使用以下测试数据：
+
+| 类型 | ID/关键词 | 说明 |
+|------|-----------|------|
+| 音乐ID | `3342707944` | （这是什么？点一下） |
+| 歌单ID | `2391850012` | Cooooldwind_喜欢的音乐 |
+| 搜索关键词 | `トゲナシトゲアリ` | 日本乐队 |
+
+---
+
+## 测试文件
+
+项目包含一个测试文件 `api/test_api.py`，使用Python标准库测试所有API：
 
 ```bash
-pip install class163-next
+python api/test_api.py
 ```
 
-依赖库：
-
-
-| 库名                 | 功能               |
-|--------------------|------------------|
-| mutagen            | 音乐元数据处理          |
- | requests           | 网络请求             |
- | cryptography       | Cookies 加密       |
- | playwright         | 用于 Playwright 登录 |
- | selenium           | 用于 Selenium 登录   |
-| netease_encode_api | 创建一个网易云专用登录会话    |
+测试内容包括：
+- 健康检查
+- 音乐信息、文件、歌词、封面
+- 播放列表信息、歌曲、封面
+- 搜索功能
 
 ---
 
-## 快速上手
+## 注意事项
 
-### 1. 登录网易云音乐
-
-```python
-from class163_next.utils.playwright_login import playwright_login
-session = playwright_login()
-```
-
-或者：
-
-```python
-from class163_next.utils.selenium_login import selenium_login
-session = selenium_login()
-```
-
-或加载已保存 Cookies：
-
-```python
-from class163_next.utils.cookies_manager import load_cookies
-session = load_cookies()
-```
-
----
-
-### 2. 获取单曲信息
-
-```python
-from class163_next.models import Music
-
-music = Music(session, music_id=12345678, quality=1, detail=True, lyric=True, file=True)
-
-# 下载文件与封面到内存
-music.download_file(session)
-music.download_cover(session)
-
-# 保存到本地
-music.save("song_name", file=True, cover=True, lyric=True)
-```
-
-Class163\_NexT 可以将标题、歌手、专辑、封面等信息写入音乐文件：
-
-```python
-# 在下载文件和封面后调用
-music.metadata_write()
-
-# 然后再保存
-music.save("song_with_metadata", file=True, cover=True, lyric=True)
-```
-
-* 对于 MP3 文件，会写入 ID3 标签：标题、歌手、专辑、封面。
-* 对于无损 FLAC 文件，会写入 FLAC 元数据和封面。
-* 支持歌词导出为 LRC 文件。
-
----
-
-### 4. 获取播放列表信息
-
-```python
-from class163_next.models import Playlist
-
-playlist = Playlist(session, playlist_id=87654321, info=True, detail=True, file=True, lyric=True)
-playlist.get_file(session, quality=2)
-```
-
-* 并发+批量获取歌曲详情、歌词和文件，提高批量处理速度。
-
----
-
-### 5. 搜索音乐或播放列表
-
-```python
-from class163_next.models import Music163
-
-search = Class163(session, "关键词")
-musics = search.music_search_results       # 单曲搜索结果
-playlists = search.playlist_search_results # 播放列表搜索结果
-```
-
-* 自动识别 ID / URL / 搜索关键词，支持批量搜索和获取详细信息。
-
----
-
-## 支持音质
-
-| 序号 | 显示名    | API命名    | 编码格式       | 码率              |
-|----|--------|----------|------------|-----------------|
-| 1  | 标准     | standard | mp3        | 128kbps         |
-| 2  | 较高     | higher   | mp3        | 192kbps         |
-| 3  | 极高     | exhigh   | mp3        | 320kbps         |
-| 4  | 无损     | lossless | aac (flac) | 最高 48kHz/16bit  |
-| 5  | 高解析度无损 | hires    | aac (flac) | 最高 192kHz/24bit |
-| 6  | 高清臻音   | jyeffect | aac (flac) | 96kHz/24bit     |
-| 7  | 超清母带   | jymaster | aac (flac) | 192kHz/24bit    |
-
-###### 备注：较高音质已经从客户端消失了；高清臻音和超清母带格式可能会有 AI 合成的参与（强行拉到相应码率），而无损和高解析度无损只会对版权方上传的码率过高的音频做压缩处理。
-
----
-
-## 安全与注意事项
-
-* Cookies 会加密存储在 `~/.class163_next_cookies`。
-* 确保系统已安装对应浏览器（Chromium / Edge）用于自动登录。（对于该点，仍需大量测试验证）
-* 批量下载大文件时，请注意内存使用，可通过 `clean=True` 清理内存数据。
-
----
-
-## 免责声明
-
-Class163\_NexT 仅提供技术工具**用于学习、研究和个人备份用途**。用户必须自行确保对本 Python 库及其产生的任何文件的使用符合当地法律法规以及网易云音乐的服务条款。
-**开发者不对任何违反版权或非法分发音乐文件的行为承担责任。**
-请勿将**本 Python 库及其生成的任何文件**用于商业用途或未经授权的公开分发。
-请妥善保管我们替您存储在 `~/.class163_next_cookies` 里面的**所有文件**。因不妥善保管导致用户信息泄露造成的后果**应由用户自行承担**。
-
----
-
-###### Written by $CooooldWind$ & $ChatGPT^{TM}$.
+1. **会话管理**: API需要有效的网易云音乐登录会话，通过 `start.py` 启动时会自动完成登录
+2. **重定向接口**: `/file` 和 `/cover` 接口返回重定向响应，客户端需要支持自动跟随重定向
+3. **时间格式**: 所有时间字段统一使用 `YYYY-MM-DD HH:MM:SS` 格式
+4. **分页**: 播放列表歌曲接口支持 `limit` 和 `offset` 分页参数
