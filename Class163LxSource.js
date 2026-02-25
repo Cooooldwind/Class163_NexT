@@ -1,7 +1,7 @@
 /**
  * @name Class163
- * @description [测试中 - 有致命Bug]Class163官方自建Lx Music源
- * @version 0.1.0
+ * @description Lx Music网易云源，由Class163_NexT驱动
+ * @version 1.0.0
  * @author CooooldWind
  */
 
@@ -21,7 +21,16 @@ const httpRequest = (url, options = {}) => new Promise((resolve, reject) => {
   console.log('请求 URL:', url)
   console.log('请求选项:', options)
   
-  request(url, options, (err, resp) => {
+  passCAOptions = {
+    ...options,
+    agentOptions: {
+      rejectUnauthorized: false,
+    }
+  }
+
+  console.log('传递给 request 函数的选项:', passCAOptions)
+
+  request(url, passCAOptions, (err, resp) => {
     if (err) {
       console.log('请求错误:', err)
       return reject(err)
@@ -50,7 +59,7 @@ const apis = {
       console.log('歌曲 ID:', songmid)
       console.log('音质:', quality)
       
-      const requestUrl = `https://frp-bar.com:36163/api/music/file/${songmid}?quality=${quality}`
+      const requestUrl = `https://api.u59138.nyat.app:36163/api/music/file/${songmid}?quality=${quality}`
       console.log('构建的请求 URL:', requestUrl)
       
       return httpRequest(requestUrl).then(data => {
