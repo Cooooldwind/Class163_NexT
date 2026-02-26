@@ -1,7 +1,7 @@
 /**
  * @name Class163
  * @description Lx Music网易云源，由Class163_NexT_API驱动
- * @version 1.0.3
+ * @version 1.0.3.hotfix.01
  * @author CooooldWind
  */
 
@@ -58,7 +58,7 @@ on(EVENT_NAMES.request, ({ source, action, info }) => {
 })
 
 send(EVENT_NAMES.inited, {
-  openDevTools: true, // 是否打开开发者工具，方便用于调试脚本
+  openDevTools: false, // 是否打开开发者工具，方便用于调试脚本
   sources: { // 当前脚本支持的源
     wy: { // 支持的源对象，可用 key 值：kw/kg/tx/wy/mg/local
       name: '网易云音乐',
