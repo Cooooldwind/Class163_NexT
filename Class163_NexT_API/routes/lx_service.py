@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/get", response_model=dict)
 async def get_lx_service(
     id: int,
-    qualify: int = 1,  # 1: 标准, 2: 较高, 3: 极高, 4: 无损, 5: 高解析度无损
+    quality: int = 1,  # 1: 标准, 2: 较高, 3: 极高, 4: 无损, 5: 高解析度无损
 ):
     try:
         # 加载会话
@@ -18,7 +18,7 @@ async def get_lx_service(
         
         # 获取音乐信息和文件URL
         music = Music(session, music_id=id, detail=True, file=True)
-        music.quality = qualify  # 设置音质
+        music.quality = quality  # 设置音质
         music.get_file(session)  # 获取音乐文件URL
         
         # 检查是否获取到了有效的URL

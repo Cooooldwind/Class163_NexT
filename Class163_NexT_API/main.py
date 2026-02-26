@@ -7,7 +7,7 @@ from Class163_NexT.models import Music, Playlist, Class163
 app = FastAPI(
     title="Class163_NexT API",
     description="网易云音乐操作接口集，支持获取音乐信息、歌词、播放列表等功能",
-    version="0.2.0",
+    version="0.2.1",
     docs_url="/docs",
     redoc_url="/redoc"
 )
