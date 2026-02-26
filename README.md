@@ -10,6 +10,14 @@
 
 Class163\_NexT 是一个 Python 库，用于操作网易云音乐，包括获取音乐信息、歌词、音乐文件、播放列表以及自动登录管理 Cookies。支持批量处理、多音质下载、内存中处理和本地保存音乐文件。
 
+
+
+**近日动向：** 我们基于 fastapi 制作了 API 服务，并通过 **雨云** 提供的云应用服务部署了稳定的 Lx Music 源。您现在可以切换到 [feature/api](https://github.com/cooooldwind/class163_next/tree/feature/api) 通过克隆等方式下载源码并部署属于你自己的 API 服务，也可以 [右键复制 Lx Music 源链接](https://gh-proxy.org/https://raw.githubusercontent.com/Cooooldwind/Class163_NexT/refs/heads/feature/lx_source/Class163LxSource.js) 并导入 Lx Music。
+
+
+
+[点我点我，跟我一起用雨云吧！](https://www.rainyun.com/coooold_?s=github) 
+
 ---
 
 ## 功能概览
