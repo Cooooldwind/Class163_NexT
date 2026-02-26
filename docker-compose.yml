@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  class163-next-api:
+    build: .
+    container_name: class163-next-api
+    ports:
+      - "16360:16360"
+    volumes:
+      - ~/.class163_next_key:/root/.class163_next_key
+      - ~/.class163_next_cookies:/root/.class163_next_cookies
+    restart: unless-stopped

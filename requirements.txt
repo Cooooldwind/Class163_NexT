@@ -11,8 +11,8 @@ mutagen>=1.47.0
 cryptography>=45.0.7
 
 # 登录相关
-playwright>=1.55.0
-selenium>=4.35.0
+# playwright>=1.55.0
+# selenium>=4.35.0
 
 # 数据处理
 pydantic>=2.0.0
