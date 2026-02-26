@@ -18,9 +18,9 @@ def format_timestamp(timestamp: int) -> str:
         return ""
 
 # 获取播放列表信息
-@router.get("/info/{playlist_id}", response_model=dict)
+@router.get("/info", response_model=dict)
 async def get_playlist_info(
-    playlist_id: int,
+    id: int,
     info: bool = True,
     detail: bool = False,
 ):
@@ -31,7 +31,7 @@ async def get_playlist_info(
             raise HTTPException(status_code=401, detail="未找到有效会话，请先登录")
         
         # 获取播放列表信息
-        playlist = Playlist(session, playlist_id=playlist_id, info=info, detail=detail)
+        playlist = Playlist(session, playlist_id=id, info=info, detail=detail)
         
         # 获取时间戳并格式化
         create_timestamp = getattr(playlist, "create_timestamp", -1)
@@ -67,9 +67,9 @@ async def get_playlist_info(
         raise HTTPException(status_code=500, detail=f"获取播放列表信息失败: {str(e)}")
 
 # 获取播放列表歌曲
-@router.get("/songs/{playlist_id}", response_model=dict)
+@router.get("/songs", response_model=dict)
 async def get_playlist_songs(
-    playlist_id: int,
+    id: int,
     limit: Optional[int] = None,
     offset: int = 0,
 ):
@@ -80,7 +80,7 @@ async def get_playlist_songs(
             raise HTTPException(status_code=401, detail="未找到有效会话，请先登录")
         
         # 获取播放列表及其歌曲
-        playlist = Playlist(session, playlist_id=playlist_id, info=True, detail=True)
+        playlist = Playlist(session, playlist_id=id, info=True, detail=True)
         
         # 获取歌曲列表
         tracks = getattr(playlist, "tracks", [])
@@ -115,9 +115,9 @@ async def get_playlist_songs(
         raise HTTPException(status_code=500, detail=f"获取播放列表歌曲失败: {str(e)}")
 
 # 获取播放列表封面（重定向到封面链接）
-@router.get("/cover/{playlist_id}")
+@router.get("/cover")
 async def get_playlist_cover(
-    playlist_id: int,
+    id: int,
 ):
     try:
         # 加载会话
@@ -126,7 +126,7 @@ async def get_playlist_cover(
             raise HTTPException(status_code=401, detail="未找到有效会话，请先登录")
         
         # 直接从API获取封面URL
-        playlist_response = session.encoded_post("https://music.163.com/weapi/v6/playlist/detail", {"id": playlist_id}).json()["playlist"]
+        playlist_response = session.encoded_post("https://music.163.com/weapi/v6/playlist/detail", {"id": id}).json()["playlist"]
         cover_url = playlist_response.get("coverImgUrl", "")
         
         # 检查是否获取到了有效的URL

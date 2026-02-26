@@ -7,9 +7,9 @@ from typing import Optional
 router = APIRouter()
 
 # 获取音乐信息
-@router.get("/info/{music_id}", response_model=dict)
+@router.get("/info", response_model=dict)
 async def get_music_info(
-    music_id: int,
+    id: int,
     detail: bool = True,
 ):
     try:
@@ -19,7 +19,7 @@ async def get_music_info(
             raise HTTPException(status_code=401, detail="未找到有效会话，请先登录")
         
         # 获取音乐信息（detail模式下不获取lyric）
-        music = Music(session, music_id=music_id, detail=detail)
+        music = Music(session, music_id=id, detail=detail)
         
         # 构建响应数据
         response_data = {
@@ -35,9 +35,9 @@ async def get_music_info(
         raise HTTPException(status_code=500, detail=f"获取音乐信息失败: {str(e)}")
 
 # 获取音乐文件（重定向到下载链接）
-@router.get("/file/{music_id}")
+@router.get("/file")
 async def get_music_file(
-    music_id: int,
+    id: int,
     quality: int = 1,  # 1: 标准, 2: 较高, 3: 极高, 4: 无损, 5: 高解析度无损
 ):
     try:
@@ -47,7 +47,7 @@ async def get_music_file(
             raise HTTPException(status_code=401, detail="未找到有效会话，请先登录")
         
         # 获取音乐信息和文件URL
-        music = Music(session, music_id=music_id, detail=True, file=True)
+        music = Music(session, music_id=id, detail=True, file=True)
         music.quality = quality  # 设置音质
         music.get_file(session)  # 获取音乐文件URL
         
@@ -61,9 +61,9 @@ async def get_music_file(
         raise HTTPException(status_code=500, detail=f"获取音乐文件失败: {str(e)}")
 
 # 获取音乐歌词
-@router.get("/lyric/{music_id}", response_model=dict)
+@router.get("/lyric", response_model=dict)
 async def get_music_lyric(
-    music_id: int,
+    id: int,
 ):
     try:
         # 加载会话
@@ -72,7 +72,7 @@ async def get_music_lyric(
             raise HTTPException(status_code=401, detail="未找到有效会话，请先登录")
         
         # 获取音乐歌词
-        music = Music(session, music_id=music_id, lyric=True)
+        music = Music(session, music_id=id, lyric=True)
         
         # 构建响应数据
         response_data = {
@@ -87,9 +87,9 @@ async def get_music_lyric(
         raise HTTPException(status_code=500, detail=f"获取音乐歌词失败: {str(e)}")
 
 # 获取音乐封面（重定向到封面链接）
-@router.get("/cover/{music_id}")
+@router.get("/cover")
 async def get_music_cover(
-    music_id: int,
+    id: int,
     pixel: int = -1,  # 图片边长，若不填，图片边长将由网站决定
 ):
     try:
@@ -99,7 +99,7 @@ async def get_music_cover(
             raise HTTPException(status_code=401, detail="未找到有效会话，请先登录")
         
         # 获取音乐信息和封面URL
-        music = Music(session, music_id=music_id, detail=True)
+        music = Music(session, music_id=id, detail=True)
         
         # 检查是否获取到了有效的URL
         if not music.cover_url:

@@ -1,5 +1,10 @@
 # Class163_NexT API 文档
 
+## 版本信息
+
+- **当前版本**: `v0.2.0`
+- **更新日期**: 2026-02-26
+
 ## 基础信息
 
 - **基础URL**: `http://127.0.0.1:16360`
@@ -53,14 +58,14 @@ GET /health
 
 #### 2.1 获取音乐信息
 ```
-GET /api/music/info/{music_id}
+GET /api/music/info
 ```
 
 **参数**:
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| music_id | int | 是 | 音乐ID |
+| id | int | 是 | 音乐ID |
 | detail | bool | 否 | 是否获取详细信息，默认 `true` |
 
 **响应示例**:
@@ -78,14 +83,14 @@ GET /api/music/info/{music_id}
 
 #### 2.2 获取音乐文件（重定向）
 ```
-GET /api/music/file/{music_id}
+GET /api/music/file
 ```
 
 **参数**:
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| music_id | int | 是 | 音乐ID |
+| id | int | 是 | 音乐ID |
 | quality | int | 否 | 音质等级，默认 `1` |
 
 **音质等级说明**:
@@ -104,14 +109,14 @@ GET /api/music/file/{music_id}
 
 #### 2.3 获取音乐歌词
 ```
-GET /api/music/lyric/{music_id}
+GET /api/music/lyric
 ```
 
 **参数**:
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| music_id | int | 是 | 音乐ID |
+| id | int | 是 | 音乐ID |
 
 **响应示例**:
 ```json
@@ -127,14 +132,15 @@ GET /api/music/lyric/{music_id}
 
 #### 2.4 获取音乐封面（重定向）
 ```
-GET /api/music/cover/{music_id}
+GET /api/music/cover
 ```
 
 **参数**:
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| music_id | int | 是 | 音乐ID |
+| id | int | 是 | 音乐ID |
+| pixel | int | 否 | 图片边长（像素），若不填则由网站决定 |
 
 **响应**: 返回 `307` 重定向到封面图片链接
 
@@ -144,14 +150,14 @@ GET /api/music/cover/{music_id}
 
 #### 3.1 获取播放列表信息
 ```
-GET /api/playlist/info/{playlist_id}
+GET /api/playlist/info
 ```
 
 **参数**:
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| playlist_id | int | 是 | 播放列表ID |
+| id | int | 是 | 播放列表ID |
 | info | bool | 否 | 是否获取基本信息，默认 `true` |
 | detail | bool | 否 | 是否获取歌曲详情，默认 `false` |
 
@@ -193,14 +199,14 @@ GET /api/playlist/info/{playlist_id}
 
 #### 3.2 获取播放列表歌曲
 ```
-GET /api/playlist/songs/{playlist_id}
+GET /api/playlist/songs
 ```
 
 **参数**:
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| playlist_id | int | 是 | 播放列表ID |
+| id | int | 是 | 播放列表ID |
 | limit | int | 否 | 返回数量限制 |
 | offset | int | 否 | 偏移量，默认 `0` |
 
@@ -227,14 +233,14 @@ GET /api/playlist/songs/{playlist_id}
 
 #### 3.3 获取播放列表封面（重定向）
 ```
-GET /api/playlist/cover/{playlist_id}
+GET /api/playlist/cover
 ```
 
 **参数**:
 
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
-| playlist_id | int | 是 | 播放列表ID |
+| id | int | 是 | 播放列表ID |
 
 **响应**: 返回 `307` 重定向到封面图片链接
 
@@ -336,6 +342,41 @@ GET /api/search/playlist
   "total": 93
 }
 ```
+
+---
+
+### 5. 洛雪API服务接口
+
+#### 5.1 获取音乐文件URL（JSON格式）
+```
+GET /api/lx_service/get
+```
+
+**参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| id | int | 是 | 音乐ID |
+| qualify | int | 否 | 音质等级，默认 `1` |
+
+**音质等级说明**:
+
+| 等级 | 说明 |
+|------|------|
+| 1 | 标准 (128kbps MP3) |
+| 2 | 较高 (192kbps MP3) |
+| 3 | 极高 (320kbps MP3) |
+| 4 | 无损 (FLAC) |
+| 5 | 高解析度无损 (Hi-Res) |
+
+**响应示例**:
+```json
+{
+  "url": "https://music.126.net/xxx.mp3"
+}
+```
+
+**说明**: 此接口返回JSON格式的URL，而非重定向响应，适合需要直接获取URL的场景。
 
 ---
 
