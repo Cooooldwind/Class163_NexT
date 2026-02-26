@@ -3,11 +3,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routes import music, playlist, search, lx_service
 from Class163_NexT.utils.cookies_manager import load_cookies
 from Class163_NexT.models import Music, Playlist, Class163
+import uvicorn
+import logging
+
+# 配置uvicorn日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# 获取uvicorn日志记录器
+uvicorn_logger = logging.getLogger("uvicorn")
+uvicorn_logger.handlers[0].setFormatter(
+    logging.Formatter('%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s',
+                     datefmt='%Y-%m-%d %H:%M:%S')
+)
 
 app = FastAPI(
     title="Class163_NexT API",
     description="网易云音乐操作接口集，支持获取音乐信息、歌词、播放列表等功能",
-    version="0.2.1",
+    version="0.2.2",
     docs_url="/docs",
     redoc_url="/redoc"
 )
