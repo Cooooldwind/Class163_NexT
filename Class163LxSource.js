@@ -1,7 +1,7 @@
 /**
  * @name Class163
  * @description Lx Music网易云源，由Class163_NexT_API驱动
- * @version 1.0.3.hotfix.01
+ * @version 1.0.4b02
  * @author CooooldWind
  */
 
@@ -16,19 +16,10 @@ const qualitys = {
   },
 }
 
-const httpRequest = (url, options = {}) => new Promise((resolve, reject) => {
-  console.log(url)
+const httpRequest = (url, options) => new Promise((resolve, reject) => {
   request(url, options, (err, resp) => {
-    console.log(resp)
-    if (err) {
-      
-      return reject(err)
-    }
-    if (resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) {
-      resolve({ url: resp.headers.location })
-    } else {
-      resolve(resp.body)
-    }
+    if (err) return reject(err)
+    resolve(resp.body)
   })
 })
 
@@ -36,7 +27,7 @@ const apis = {
   wy: {
     musicUrl({ songmid }, quality) {
       console.log(`Searching ${songmid} in quality ${quality}`)
-      requestUrl = `https://api.u59138.nyat.app:36163/api/music/file/${songmid}?quality=${quality}`
+      requestUrl = `https://api.u59138.nyat.app:36163/api/lx_service/get?id=${songmid}?quality=${quality}`
       
       return httpRequest(requestUrl).then(data => {
         console.log(data.url)
