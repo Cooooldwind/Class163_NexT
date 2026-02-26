@@ -1,7 +1,7 @@
 /**
  * @name Class163
  * @description Lx Music网易云源，由Class163_NexT_API驱动
- * @version 1.0.4
+ * @version 1.0.5
  * @author CooooldWind
  */
 
@@ -28,7 +28,7 @@ const apis = {
   wy: {
     musicUrl({ songmid }, quality) {
       console.log(`Searching ${songmid} in quality ${quality}`)
-      requestUrl = `https://api.u59138.nyat.app:36163/api/lx_service/get?id=${songmid}&quality=${quality}`
+      requestUrl = `http://110.42.111.49:16360/api/lx_service/get?id=${songmid}&quality=${quality}`
       
       return httpRequest(requestUrl).then(data => {
         console.log(data.url)
