@@ -1,7 +1,7 @@
 /**
  * @name Class163
  * @description Lx Music网易云源，由Class163_NexT_API驱动
- * @version 1.0.2
+ * @version 1.0.3
  * @author CooooldWind
  */
 
@@ -16,9 +16,12 @@ const qualitys = {
   },
 }
 
-const httpRequest = (url, options) => new Promise((resolve, reject) => {
+const httpRequest = (url, options = {}) => new Promise((resolve, reject) => {
+  console.log(url)
   request(url, options, (err, resp) => {
+    console.log(resp)
     if (err) {
+      
       return reject(err)
     }
     if (resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) {
@@ -32,8 +35,11 @@ const httpRequest = (url, options) => new Promise((resolve, reject) => {
 const apis = {
   wy: {
     musicUrl({ songmid }, quality) {
-      const requestUrl = `https://api.u59138.nyat.app:36163/api/music/file/${songmid}?quality=${quality}`
+      console.log(`Searching ${songmid} in quality ${quality}`)
+      requestUrl = `https://api.u59138.nyat.app:36163/api/music/file/${songmid}?quality=${quality}`
+      
       return httpRequest(requestUrl).then(data => {
+        console.log(data.url)
         return data.url
       })
     },
@@ -52,7 +58,7 @@ on(EVENT_NAMES.request, ({ source, action, info }) => {
 })
 
 send(EVENT_NAMES.inited, {
-  openDevTools: false, // 是否打开开发者工具，方便用于调试脚本
+  openDevTools: true, // 是否打开开发者工具，方便用于调试脚本
   sources: { // 当前脚本支持的源
     wy: { // 支持的源对象，可用 key 值：kw/kg/tx/wy/mg/local
       name: '网易云音乐',
