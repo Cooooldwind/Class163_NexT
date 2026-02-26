@@ -9,6 +9,7 @@ uvicorn[standard]>=0.23.0
 netease-encode-api>=1.2.3
 mutagen>=1.47.0
 cryptography>=45.0.7
+Class163_NexT>=0.3.0
 
 # 登录相关
 # playwright>=1.55.0
