@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import music, playlist, search, lx_service
+from .routes import music, playlist, search, lx_service, invite_link
 from Class163_NexT.utils.cookies_manager import load_cookies
 from Class163_NexT.models import Music, Playlist, Class163
 import uvicorn
@@ -42,6 +42,7 @@ app.include_router(music.router, prefix="/api/music", tags=["音乐"])
 app.include_router(playlist.router, prefix="/api/playlist", tags=["播放列表"])
 app.include_router(search.router, prefix="/api/search", tags=["搜索"])
 app.include_router(lx_service.router, prefix="/api/lx_service", tags=["洛雪API服务"])
+app.include_router(invite_link.router, prefix="/api", tags=["邀请链接"])
 
 @app.get("/")
 async def root():
