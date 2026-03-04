@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - "*"   # 打 tag 才触发
-    branches: [main]
+    branches: ["main"]
 
 jobs:
   deploy:
